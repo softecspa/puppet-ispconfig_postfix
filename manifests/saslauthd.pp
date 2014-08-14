@@ -38,7 +38,7 @@ class ispconfig_postfix::saslauthd (
     owner   => 'root',
     group   => 'root',
     mode    => '0444',
-    source  => 'puppet:///modules/ispconfig_postfix/sasl/smtpd.conf'
+    source  => 'puppet:///modules/ispconfig_postfix/sasl/smtpd.conf',
   } ->
 
   service {$ispconfig_postfix::saslauthd::saslauthd_service:

@@ -7,6 +7,7 @@ class ispconfig_postfix::params {
   ]
   $root_dir             = '/etc/postfix'
   $ssl_dir              = "${root_dir}/ssl"
+  $maincf               = "${root_dir}/main.cf"
   $localhostnames       = "${root_dir}/local-host-names"
   $ssl                  = true
   $ssl_passphrase       = $::postfix_ssl_passphrase

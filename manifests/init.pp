@@ -2,6 +2,7 @@ class ispconfig_postfix (
   $additional_packages  = params_lookup( 'additional_packages' ),
   $root_dir             = params_lookup( 'root_dir' ),
   $ssl_dir              = params_lookup( 'ssl_dir' ),
+  $maincf               = params_lookup( 'maincf' ),
   $localhostnames       = params_lookup( 'localhostnames' ),
   $ssl                  = params_lookup( 'ssl' ),
   $ssl_passphrase       = params_lookup( 'ssl_passphrase' ),
@@ -33,15 +34,16 @@ class ispconfig_postfix (
     groups  => 'sasl',
     uid     => $ispconfig_postfix::uid,
     gid     => $ispconfig_postfix::gid,
-  }
+  } ->
+
+  class {'postfix':}
 
   file { $localhostnames:
     ensure  => present,
     mode    => '0644',
     owner   => root,
     group   => root,
-    require => Package["postfix"],
-    #before  => [ Exec["postfix-restart"], Exec["saslauthd-start"] ]
+    require => Package[$postfix::package]
   }
 
   file { "${localhostnames}-puppet":
@@ -50,20 +52,22 @@ class ispconfig_postfix (
     owner   => root,
     group   => root,
     content => template("ispconfig_postfix/local-host-names-puppet.erb"),
-    require => Package['postfix'],
-    #before  => Exec['postfix-restart'],
+    require => Package[$postfix::package],
+    notify  => Service[$postfix::service],
   }
 
   augeas { 'mailname':
     context => "/files/etc/mailname",
     changes => "set hostname '${::fqdn}'",
+    notify  => Service[$postfix::service],
   }
 
   file {$ispconfig_postfix::virtusertable:
     ensure  => present,
     owner   => 'root',
     group   => 'root',
-    mode    => '0444'
+    mode    => '0444',
+    require => Package[$postfix::package],
   } ->
 
   exec {'virtusertable':
@@ -71,26 +75,50 @@ class ispconfig_postfix (
     path    => $::path,
     creates => $ispconfig_postfix::virtusertabledb,
     cwd     => $ispconfig_postfix::root_dir,
+    notify  => Service[$postfix::service]
   }
 
-  class {'postfix':
-    template  => 'ispconfig_postfix/main.cf.erb'
-  } ->
   class {'postfix::aliases':
     maps  => {
       'root'      => $ispconfig_postfix::root_alias,
       'www-data'  => $ispconfig_postfix::wwwdata_alias,
     }
   }
-  include ispconfig_postfix::saslauthd
+
+  $postconf = {
+    'inet_protocols'                  => {value => 'ipv4'},
+    'smtpd_recipient_restrictions'    => {value => 'permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination'},
+    'home_mailbox'                    => {value => 'Maildir/'},
+    'mailbox_command'                 => {value => ''},
+    'myorigin'                        => {value => '/etc/mailname'},
+    'mydestination'                   => {value => '/etc/postfix/local-host-names, /etc/postfix/local-host-names-puppet'},
+    'mydomain'                        => {value => "${::cluster}.${::clusterdomain}"},
+    'smtpd_sasl_local_domain'         => {value => ''},
+    'smtpd_sasl_auth_enable'          => {value => 'yes'},
+    'smtpd_sasl_security_options'     => {value => 'noanonymous'},
+    'broken_sasl_auth_clients'        => {value => 'yes'},
+    'smtpd_sasl_authenticated_header' => {value => 'yes'},
+  }
+  create_resources('postfix::postconf',$postconf,{require => Package[$postfix::package], notify => Service[$postfix::service]})
+
+  file_line {'virtual_maps':
+    path    => $ispconfig_postfix::maincf,
+    line    => "virtual_maps = hash:${ispconfig_postfix::virtusertable}",
+    match   => '^virtual_maps',
+    require => Package[$postfix::package],
+    notify  => Service[$postfix::service]
+  }
+
+  class {'ispconfig_postfix::saslauthd':
+    require => Class['postfix']
+  }
+
+
   if $ispconfig_postfix::ssl {
     class {'ispconfig_postfix::ssl':
       ssl_dir     => $ispconfig_postfix::ssl_dir,
-      passphrase  => $ispconfig_postfix::ssl_passphrase
+      passphrase  => $ispconfig_postfix::ssl_passphrase,
+      require     => Package['postfix']
     }
   }
-
-  User['postfix'] ->
-  Class['postfix'] ->
-  Class['ispconfig_postfix::saslauthd']
 }
