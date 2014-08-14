@@ -1,19 +1,25 @@
 class ispconfig_postfix (
-  $additional_packages  = params_lookup( 'additional_packages' ),
-  $root_dir             = params_lookup( 'root_dir' ),
-  $ssl_dir              = params_lookup( 'ssl_dir' ),
-  $maincf               = params_lookup( 'maincf' ),
-  $localhostnames       = params_lookup( 'localhostnames' ),
-  $ssl                  = params_lookup( 'ssl' ),
-  $ssl_passphrase       = params_lookup( 'ssl_passphrase' ),
-  $spool_dir            = params_lookup( 'spool_dir' ),
-  $uid                  = params_lookup( 'uid' ),
-  $gid                  = params_lookup( 'gid' ),
-  $saslauthd_package    = params_lookup( 'saslauthd_package' ),
-  $root_alias           = params_lookup( 'root_alias' ),
-  $wwwdata_alias        = params_lookup( 'wwwdata_alias' ),
-  $virtusertable        = params_lookup( 'virtusertable' ),
-  $virtusertabledb      = params_lookup( 'virtusertabledb' ),
+  $additional_packages    = params_lookup( 'additional_packages' ),
+  $root_dir               = params_lookup( 'root_dir' ),
+  $ssl_dir                = params_lookup( 'ssl_dir' ),
+  $maincf                 = params_lookup( 'maincf' ),
+  $localhostnames         = params_lookup( 'localhostnames' ),
+  $ssl                    = params_lookup( 'ssl' ),
+  $ssl_passphrase         = params_lookup( 'ssl_passphrase' ),
+  $spool_dir              = params_lookup( 'spool_dir' ),
+  $uid                    = params_lookup( 'uid' ),
+  $gid                    = params_lookup( 'gid' ),
+  $saslauthd_package      = params_lookup( 'saslauthd_package' ),
+  $root_alias             = params_lookup( 'root_alias' ),
+  $wwwdata_alias          = params_lookup( 'wwwdata_alias' ),
+  $virtusertable          = params_lookup( 'virtusertable' ),
+  $virtusertabledb        = params_lookup( 'virtusertabledb' ),
+  $logrotate_olddir_owner = params_lookup( 'logrotate_olddir_owner' ),
+  $logrotate_olddir_group = params_lookup( 'logrotate_olddir_group' ),
+  $logrotate_olddir_mode  = params_lookup( 'logrotate_olddir_mode' ),
+  $logrotate_create_owner = params_lookup( 'logrotate_create_owner' ),
+  $logrotate_create_group = params_lookup( 'logrotate_create_group' ),
+  $logrotate_create_mode  = params_lookup( 'logrotate_create_mode' ),
 ) inherits ispconfig_postfix::params {
 
   package {$ispconfig_postfix::additional_packages:
@@ -120,5 +126,14 @@ class ispconfig_postfix (
       passphrase  => $ispconfig_postfix::ssl_passphrase,
       require     => Package['postfix']
     }
+  }
+
+  class {'ispconfig_postfix::logrotate':
+    olddir_owner  => $ispconfig_postfix::logrotate_olddir_owner,
+    olddir_group  => $ispconfig_postfix::logrotate_olddir_group,
+    olddir_mode   => $ispconfig_postfix::logrotate_olddir_mode,
+    create_owner  => $ispconfig_postfix::logrotate_create_owner,
+    create_group  => $ispconfig_postfix::logrotate_create_group,
+    create_mode   => $ispconfig_postfix::logrotate_create_mode,
   }
 }

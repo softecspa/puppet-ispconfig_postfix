@@ -31,4 +31,11 @@ class ispconfig_postfix::params {
   $saslauthd_default    = '/etc/default/saslauthd'
   $saslauthd_work_dir   = "${spool_dir}/var/run/saslauthd"
   $saslauthd_conf_dir   = "${root_dir}/sasl"
+
+  $logrotate_olddir_owner = 'root'
+  $logrotate_olddir_group = 'adm'
+  $logrotate_olddir_mode  = '0750'
+  $logrotate_create_owner = 'syslog'
+  $logrotate_create_group = 'adm'
+  $logrotate_create_mode  = '0644'
 }
