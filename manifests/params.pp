@@ -39,7 +39,7 @@ class ispconfig_postfix::params {
   $logrotate_create_group = 'adm'
   $logrotate_create_mode  = '0644'
 
-  $outbound_relay_host      = $::outbound_relay_host 
+  $outbound_relay_host      = $::outbound_relay_host
   $outbound_relay_port      = $::outbound_relay_port
   $outbound_relay_user      = $::outbound_relay_user
   $outbound_relay_pass      = $::outbound_relay_pass

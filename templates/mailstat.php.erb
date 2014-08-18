@@ -1,0 +1,108 @@
+<html>
+<?php
+
+//$master=array("<%= masternode %>");
+<% if has_variable?('clusterslaves') then %>
+$slaves=array(<% clusterslaves.each do |val| -%>"<%= val %>",<% end -%>);
+<% else %>
+$slaves=array();
+<% end %>
+
+$intervals=array("daily","weekly","monthly","yearly");
+//$nodes=array_merge($master,$slaves);
+$nodes=$slaves;
+
+$selected_interval=$_GET['interval'];
+if($selected_interval=='')
+    $selected_node=($_GET["node"]!='')? $_GET['node'] : $slaves[0];
+
+
+echo 'View single node: <select id="node" name="node" onchange="javascript:ch_page(\'node\');">';
+if($selected_node=='')
+    echo '<option value=""> --- </option>';
+foreach($nodes as $node)
+{
+    echo "<option value=\"$node\" ";
+    if ($node===$selected_node)
+        echo 'selected="true" ';
+    echo ">$node</option>";
+}
+echo '</select>';
+
+echo 'View cluster: <select id="interval" name="interval" onchange="javascript:ch_page(\'interval\');">';
+if($selected_interval=='')
+    echo '<option value="" selected="true"> --- </option>';
+foreach($intervals as $key => $interval)
+{
+    echo "<option value=\"$key\" ";
+    if ($key===$selected_interval)
+        echo 'selected="true" ';
+    echo ">$interval</option>";
+}
+echo '</select>';
+?>
+<hr>
+<?php
+if($selected_node!='')
+{
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="5">
+<tr>
+    <td colspan="2" align="center"><h3><?php echo $selected;?></h3></td>
+</tr>
+<tr>
+    <td colspan="2"><h1>Daily</h1></td>
+</tr>
+<tr>
+    <td><img src="http://<?php echo $selected_node?>/cgi-bin/mailgraph.cgi?0-n"><br><img src="http://<?php echo $selected_node?>/cgi-bin/mailgraph.cgi?0-e"></td>
+    <td valign="top"><img src="http://<?php echo $selected_node?>/cgi-bin/queuegraph.cgi/queuegraph_0.png"></td>
+</tr>
+<tr>
+    <td colspan="2"><h1>Weekly</h1></td>
+</tr>
+<tr>
+    <td><img src="http://<?php echo $selected_node?>/cgi-bin/mailgraph.cgi?1-n"><br><img src="http://<?php echo $selected_node?>/cgi-bin/mailgraph.cgi?1-e"></td>
+    <td valign="top"><img src="http://<?php echo $selected_node?>/cgi-bin/queuegraph.cgi/queuegraph_1.png"></td>
+</tr>
+<tr>
+    <td colspan="2"><h1>Monthly</h1></td>
+</tr>
+<tr>
+    <td><img src="http://<?php echo $selected_node?>/cgi-bin/mailgraph.cgi?2-n"><br><img src="http://<?php echo $selected_node?>/cgi-bin/mailgraph.cgi?2-e"></td>
+    <td valign="top"><img src="http://<?php echo $selected_node?>/cgi-bin/queuegraph.cgi/queuegraph_2.png"></td>
+</tr>
+<tr>
+    <td colspan="2"><h1>Yearly</h1></td>
+</tr>
+<tr>
+    <td><img src="http://<?php echo $selected_node?>/cgi-bin/mailgraph.cgi?3-n"><br><img src="http://<?php echo $selected_node?>/cgi-bin/mailgraph.cgi?3-e"></td>
+    <td valign="top"><img src="http://<?php echo $selected_node?>/cgi-bin/queuegraph.cgi/queuegraph_3.png"></td>
+</tr>
+</table>
+<?php
+}
+else
+{
+    echo '<table width="100%" border="0" cellspacing="0" cellpadding="5">';
+    foreach($nodes as $node)
+    {
+    ?>
+        <tr>
+            <td colspan="2"><h1><?php echo $node;?></h1></td>
+        </tr>
+        <tr>
+            <td><img src="http://<?php echo $node?>/cgi-bin/mailgraph.cgi?<?php echo $selected_interval;?>-n"><br><img src="http://<?php echo $node?>/cgi-bin/mailgraph.cgi?<?php echo $selected_interval;?>-e"></td>
+            <td valign="top"><img src="http://<?php echo $node?>/cgi-bin/queuegraph.cgi/queuegraph_<?php echo $selected_interval;?>.png"></td>
+        </tr>
+    <?php
+    }
+    echo '</table>';
+}
+?>
+
+<script language="javascript" type="text/javascript">
+function ch_page(param) {
+    window.location.href="http://cluster.<%= cluster %>.<%= clusterdomain %>/mailstat.php?"+param+"="+document.getElementById(param).value;
+}
+</script>
+</html>

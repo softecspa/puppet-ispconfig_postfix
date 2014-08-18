@@ -16,8 +16,13 @@ class ispconfig_postfix::saslauthd (
     context => "/files/${ispconfig_postfix::saslauthd::saslauthd_default}",
     changes => [
       'set START "yes"',
-      "set OPTIONS '\"-c -m ${ispconfig_postfix::saslauthd::saslauthd_work_dir}\"'"
-    ]
+      "set OPTIONS '\"-c -m ${ispconfig_postfix::saslauthd::saslauthd_work_dir}\"'",
+      'set NAME "saslauthd"',
+      'set MECHANISMS "pam"',
+      'set THREADS "5"',
+      'set MECH_OPTIONS ""',
+    ],
+    notify  => Service[$ispconfig_postfix::saslauthd::saslauthd_service]
   } ->
 
   exec { "mkdir_sasl_work":

@@ -86,24 +86,39 @@ class ispconfig_postfix (
 
   class {'postfix::aliases':
     maps  => {
-      'root'      => $ispconfig_postfix::root_alias,
-      'www-data'  => $ispconfig_postfix::wwwdata_alias,
+      'root'        => $ispconfig_postfix::root_alias,
+      'www-data'    => $ispconfig_postfix::wwwdata_alias,
+      'postmaster'  => 'root'
     }
   }
 
   $postconf = {
-    'inet_protocols'                  => {value => 'ipv4'},
-    'smtpd_recipient_restrictions'    => {value => 'permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination'},
-    'home_mailbox'                    => {value => 'Maildir/'},
-    'mailbox_command'                 => {value => ''},
-    'myorigin'                        => {value => '/etc/mailname'},
-    'mydestination'                   => {value => '/etc/postfix/local-host-names, /etc/postfix/local-host-names-puppet'},
-    'mydomain'                        => {value => "${::cluster}.${::clusterdomain}"},
-    'smtpd_sasl_local_domain'         => {value => ''},
-    'smtpd_sasl_auth_enable'          => {value => 'yes'},
-    'smtpd_sasl_security_options'     => {value => 'noanonymous'},
-    'broken_sasl_auth_clients'        => {value => 'yes'},
-    'smtpd_sasl_authenticated_header' => {value => 'yes'},
+    'smtpd_banner'                      => {value => '$myhostname ESMTP $mail_name (Ubuntu)'},
+    'biff'                              => {value => 'no'},
+    'append_dot_mydomain'               => {value => 'no'},
+    'readme_directory'                  => {value => 'no'},
+    'inet_protocols'                    => {value => 'ipv4'},
+    'smtpd_recipient_restrictions'      => {value => 'permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination'},
+    'home_mailbox'                      => {value => 'Maildir/'},
+    'mailbox_command'                   => {value => ''},
+    'myorigin'                          => {value => '/etc/mailname'},
+    'mydestination'                     => {value => '/etc/postfix/local-host-names, /etc/postfix/local-host-names-puppet'},
+    'mydomain'                          => {value => "${cluster}.${clusterdomain}"},
+    'smtpd_sasl_local_domain'           => {value => ''},
+    'smtpd_sasl_auth_enable'            => {value => 'yes'},
+    'smtpd_sasl_security_options'       => {value => 'noanonymous'},
+    'smtpd_use_tls'                     => {value => 'yes'},
+    'broken_sasl_auth_clients'          => {value => 'yes'},
+    'smtpd_sasl_authenticated_header'   => {value => 'yes'},
+    'smtpd_tls_session_cache_database'  => {value => 'btree:${data_directory}/smtpd_scache'},
+    'smtp_tls_session_cache_database'   => {value => 'btree:${data_directory}/smtp_scache'},
+    'alias_maps'                        => {value => 'hash:/etc/aliases'},
+    'alias_database'                    => {value => 'hash:/etc/aliases'},
+    'mynetworks'                        => {value => '127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128'},
+    'mailbox_size_limit'                => {value => '0'},
+    'recipient_delimiter'               => {value => '+'},
+    'inet_interfaces'                   => {value => 'all'},
+    'mailbox_command'                   => {value => ''},
   }
   create_resources('postfix::postconf',$postconf,{require => Package[$postfix::package], notify => Service[$postfix::service]})
 
@@ -111,6 +126,15 @@ class ispconfig_postfix (
     path    => $ispconfig_postfix::maincf,
     line    => "virtual_maps = hash:${ispconfig_postfix::virtusertable}",
     match   => '^virtual_maps',
+    require => Package[$postfix::package],
+    notify  => Service[$postfix::service]
+  }
+
+  file_line {'comment_myhostname':
+    ensure  => absent,
+    path    => $ispconfig_postfix::maincf,
+    line    => "myhostname = $::fqdn",
+    match   => '^myhostname',
     require => Package[$postfix::package],
     notify  => Service[$postfix::service]
   }
@@ -128,7 +152,7 @@ class ispconfig_postfix (
     }
   }
 
-  class {'ispconfig_postfix::logrotate':
+  class {'softec_postfix::logrotate':
     olddir_owner  => $ispconfig_postfix::logrotate_olddir_owner,
     olddir_group  => $ispconfig_postfix::logrotate_olddir_group,
     olddir_mode   => $ispconfig_postfix::logrotate_olddir_mode,
