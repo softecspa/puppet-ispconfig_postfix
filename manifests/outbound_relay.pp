@@ -42,8 +42,8 @@ class ispconfig_postfix::outbound_relay (
       command     => "postmap hash:${ispconfig_postfix::outbound_relay::outbound_relay_hash_file}",
       refreshonly => true,
       subscribe   => File[$ispconfig_postfix::outbound_relay::outbound_relay_hash_file],
-      notify      => Service[$postfix::service],
-      require     => Package[$postfix::package],
+      notify      => Service['postfix'],
+      require     => Package['postfix'],
       path        => $::path,
     }
 
@@ -53,7 +53,7 @@ class ispconfig_postfix::outbound_relay (
       'smtp_sasl_password_maps'     => {value => "hash:${ispconfig_postfix::outbound_relay::outbound_relay_hash_file}"},
     }
 
-    create_resources('postfix::postconf',$auth_conf,{require => Package[$postfix::package], notify => Service[$postfix::service]})
+    create_resources('postfix::postconf',$auth_conf,{require => Package['postfix'], notify => Service['postfix']})
   }
 
   postfix::postconf { 'relayhost':
