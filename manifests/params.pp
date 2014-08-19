@@ -22,7 +22,7 @@ class ispconfig_postfix::params {
     default => $local_postfix_gid
   }
   $root_alias           = $::notifyemail
-  $wwwdata_alias        = $::notifyemail
+  $wwwdata_alias        = $::nocalertemail
   $virtusertable        = "${root_dir}/virtusertable"
   $virtusertabledb      = "${root_dir}/virtusertable.db"
 
