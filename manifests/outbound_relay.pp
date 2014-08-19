@@ -7,6 +7,8 @@ class ispconfig_postfix::outbound_relay (
   $outbound_relay_hash_file   = params_lookup( 'outbound_relay_hash_file' ),
 ) inherits ispconfig_postfix::params {
 
+  require ispconfig_postfix
+
   if $::operatingsystem != 'Ubuntu' {
     fail('Only Ubuntu distros are supported')
   }
