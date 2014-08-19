@@ -12,14 +12,14 @@ class ispconfig_postfix::params {
   $ssl                  = true
   $ssl_passphrase       = $::postfix_ssl_passphrase
   $spool_dir            = '/var/spool/postfix'
-  $uid                  = $::local_postfix_uid ? {
+  $uid                  = $local_postfix_uid ? {
     undef   => '3001',
-    default => $::local_postfix_uid
+    default => $local_postfix_uid
   }
 
-  $gid                  = $::local_postfix_gid ? {
+  $gid                  = $local_postfix_gid ? {
     undef   => '3001',
-    default => $::local_postfix_gid
+    default => $local_postfix_gid
   }
   $root_alias           = $::notifyemail
   $wwwdata_alias        = $::notifyemail
