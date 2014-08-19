@@ -56,8 +56,8 @@ class ispconfig_postfix::outbound_relay (
 
   postfix::postconf { 'relayhost':
     value   => $ispconfig_postfix::outbound_relay::outbound_relay_host,
-    require => Package[$postfix::package],
-    notify  => Service[$postfix::service]
+    require => Package['postfix'],
+    notify  => Service['postfix']
   }
 
 }
