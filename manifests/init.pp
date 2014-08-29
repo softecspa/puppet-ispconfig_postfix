@@ -57,13 +57,13 @@ class ispconfig_postfix (
     mode    => 644,
     owner   => root,
     group   => root,
-    content => template("ispconfig_postfix/local-host-names-puppet.erb"),
+    content => template('ispconfig_postfix/local-host-names-puppet.erb'),
     require => Package[$postfix::package],
     notify  => Service[$postfix::service],
   }
 
   augeas { 'mailname':
-    context => "/files/etc/mailname",
+    context => '/files/etc/mailname',
     changes => "set hostname '${::fqdn}'",
     notify  => Service[$postfix::service],
   }

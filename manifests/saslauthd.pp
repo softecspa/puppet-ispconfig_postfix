@@ -34,7 +34,7 @@ class ispconfig_postfix::saslauthd (
   file { $ispconfig_postfix::saslauthd::saslauthd_work_dir:
     ensure  => directory,
     owner   => 'root',
-    group  => 'sasl',
+    group   => 'sasl',
     mode    => '0710'
   } ->
 
@@ -47,8 +47,8 @@ class ispconfig_postfix::saslauthd (
   } ->
 
   service {$ispconfig_postfix::saslauthd::saslauthd_service:
-    ensure  => running,
-    enable  => true,
+    ensure    => running,
+    enable    => true,
     hasstatus => false,
     status    => "pidof ${ispconfig_postfix::saslauthd::saslauthd_service}"
   }
