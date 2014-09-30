@@ -45,4 +45,5 @@ class ispconfig_postfix::params {
   $outbound_relay_pass      = $::outbound_relay_pass
   $outbound_relay_auth      = true
   $outbound_relay_hash_file = "${root_dir}/sasl_password"
+  $monitoring               = true
 }

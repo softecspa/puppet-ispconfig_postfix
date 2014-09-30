@@ -20,7 +20,10 @@ class ispconfig_postfix (
   $logrotate_create_owner = params_lookup( 'logrotate_create_owner' ),
   $logrotate_create_group = params_lookup( 'logrotate_create_group' ),
   $logrotate_create_mode  = params_lookup( 'logrotate_create_mode' ),
+  $monitoring             = params_lookup( 'monitoring' ),
 ) inherits ispconfig_postfix::params {
+
+  validate_bool($monitoring)
 
   package {$ispconfig_postfix::additional_packages:
     ensure  => present
@@ -159,5 +162,9 @@ class ispconfig_postfix (
     create_owner  => $ispconfig_postfix::logrotate_create_owner,
     create_group  => $ispconfig_postfix::logrotate_create_group,
     create_mode   => $ispconfig_postfix::logrotate_create_mode,
+  }
+
+  if $ispconfig_postfix::monitoring {
+    include softec_postfix::monitoring
   }
 }
